@@ -262,6 +262,24 @@ My recommended format for your push payload when using this plugin (while it dif
 }
 ```
 
+However, if you want to use the mixed payload, you can make it so the values in your `data` payload is passed to the app when tapping the notification by adding `"click_action": "com.adobe.phonegap.push.background.MESSAGING_EVENT"` to your `notification` payload.
+Your payload would end up looking something like this:
+
+```json
+{
+  "notification": {
+    "title": "Test Notification",
+    "body": "This offer expires at 11:30 or whatever",
+    "notId": 10,
+    "click_action": "com.adobe.phonegap.push.background.MESSAGING_EVENT"
+  },
+  "data": {
+     "surveyID": "ewtawgreg-gragrag-rgarhthgbad"
+  }
+}
+```
+**Important note:** By using the `notification` object in your payload, in all cases, all custom notification features provided by this plugin are unavailable.
+
 When your app is in the foreground any `on('notification')` handlers you have registered will be called. If your app is in the background, then the notification will show up in the system tray. Clicking on the notification in the system tray will start the app, and your `on('notification')` handler will be called with the following data:
 
 ```json
@@ -2107,6 +2125,33 @@ Here's a sample JSON payload to send a push notification to an Android or iOS de
 	}
 }
 ```
+
+On iOS, using the FCM app server protocol, if you are trying to send a silent push and foreground pushes are not being triggered, try adding the ("content_available" : true) field to your payload. Here's the above sample JSON payload with this field included:
+```json
+{
+	"to" : "bk3RNwTe3H0:CI2k_HHwgIpoDKCIZvvDMExUdFQ3P1...",
+	/* To send a silent push, omit the entire notification section and send only data */
+	"notification": {
+		"title": "Test title", /* The notification's title */
+		"body": "Test body.", /* The notification's body text */
+		"subtitle": "Test subtitle", /* iOS: The notification's subtitle */
+		"sound": "default", /* The sound to play when the device receives the notification */
+		"tag": "1", /* Android: Group notifications with the same tag */
+		"icon": "push_icon", /* Android: PNG icon from the res/drawable folder */
+		"color": "#AABBCC" /* Android: Icon's background color in #RRGGBB format */
+	},
+	/* Optional payload that will be available from data.additionalData */
+	"data": {
+		"custom_var_1": "custom value here", /* Retrieved on app as data.additionalData.custom_var_1 */
+		"custom_var_2:" "custom value here" /* Retrieved on app as data.additionalData.custom_var_2 */
+	},
+  /* Forces FCM silent push notifications to be triggered in the foreground of your iOS device. */
+  "content_available": true  
+}
+```
+*Doc modification came in response to @andreszs - Issue [#2449](https://github.com/phonegap/phonegap-plugin-push/issues/2449).
+
+** IMPORTANT: When using the content_available field, Android payload issues may occur. [Read here](../docs/PAYLOAD.md#user-content-use-of-content_available-true) Make sure you separate your Android/iOS server payloads to mitigate any problems that may arise. 
 
 More information on how to send push notifications using the FCM HTTP protocol and payload details can be found here:
 
